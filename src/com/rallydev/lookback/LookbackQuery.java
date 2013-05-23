@@ -19,7 +19,7 @@ public class LookbackQuery {
     int pagesize = 20000;
     int start = 0;
 
-    protected LookbackQuery(LookbackApi parentApi) {
+    LookbackQuery(LookbackApi parentApi) {
         this.parentApi = parentApi;
     }
 
@@ -108,24 +108,24 @@ public class LookbackQuery {
         return this;
     }
 
-    protected void validateQuery() {
+    void validateQuery() {
         checkFieldsValid();
         checkFindValid();
     }
 
-    private void checkFieldsValid() {
+    void checkFieldsValid() {
         if (isFieldsTrue && fields != null) {
             throw new LookbackException("Cannot set fields=true and pass required fields");
         }
     }
 
-    private void checkFindValid() {
+    void checkFindValid() {
         if (find == null) {
             throw new LookbackException("Cannot execute query without find");
         }
     }
 
-    protected String buildRequestJson() {
+    String buildRequestJson() {
         Map<String, Object> request = new HashMap<String, Object>();
 
         request.put("find", find);

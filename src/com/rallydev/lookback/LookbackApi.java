@@ -2,13 +2,13 @@ package com.rallydev.lookback;
 
 public class LookbackApi {
 
-    private String server = "https://rally1.rallydev.com";
-    private String versionMajor = "2";
-    private String versionMinor = "0";
+    String server = "https://rally1.rallydev.com";
+    String versionMajor = "2";
+    String versionMinor = "0";
 
-    private String workspace;
-    private String username;
-    private String password;
+    String workspace;
+    String username;
+    String password;
 
     public LookbackApi setCredentials(String username, String password) {
         this.username = username;
@@ -40,7 +40,7 @@ public class LookbackApi {
         return new LookbackQuery(this);
     }
 
-    protected void executeQuery(String requestJson) {
+    void executeQuery(String requestJson) {
 
     }
 }
