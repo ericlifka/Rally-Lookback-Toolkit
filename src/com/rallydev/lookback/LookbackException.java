@@ -2,7 +2,11 @@ package com.rallydev.lookback;
 
 public class LookbackException extends RuntimeException {
 
-    public LookbackException(String message) {
+    LookbackException(String message) {
         super(message);
+    }
+
+    LookbackException(Throwable thrown) {
+        super(thrown);
     }
 }

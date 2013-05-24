@@ -1,7 +1,8 @@
 package com.rallydev.lookback;
 
-import com.google.gson.Gson;
+import com.rits.cloning.Cloner;
 
+import java.io.IOException;
 import java.util.*;
 
 public class LookbackQuery {
@@ -23,10 +24,42 @@ public class LookbackQuery {
         this.parentApi = parentApi;
     }
 
-    public void execute() {
+    LookbackQuery(LookbackResult previousPage, LookbackApi parentApi) {
+        this.parentApi = parentApi;
+        cloneFields(previousPage.queryContext);
+        updateToNextPage();
+    }
+
+    void cloneFields(LookbackQuery previousQuery) {
+        Cloner cloner = new Cloner();
+
+        find = cloner.deepClone(previousQuery.find);
+        sort = cloner.deepClone(previousQuery.sort);
+        fields = cloner.deepClone(previousQuery.fields);
+        hydrate = cloner.deepClone(previousQuery.hydrate);
+        properties = cloner.deepClone(previousQuery.properties);
+
+        isFieldsTrue = previousQuery.isFieldsTrue;
+        pagesize = previousQuery.pagesize;
+        start = previousQuery.start;
+    }
+
+    void updateToNextPage() {
+        start += pagesize;
+    }
+
+    public LookbackResult execute() {
+        try {
+            return validateAndRun();
+        }
+        catch (IOException exception) {
+            throw new LookbackException(exception);
+        }
+    }
+
+    LookbackResult validateAndRun() throws IOException {
         validateQuery();
-        String requestJson = buildRequestJson();
-        parentApi.executeQuery(requestJson);
+        return parentApi.executeQuery(this);
     }
 
     public LookbackQuery setPagesize(int pagesize) {
@@ -126,19 +159,18 @@ public class LookbackQuery {
     }
 
     String buildRequestJson() {
-        Map<String, Object> request = new HashMap<String, Object>();
+        QueryBuilder query = new QueryBuilder();
+        addParametersToQuery(query);
+        return query.getQueryJson();
+    }
 
-        request.put("find", find);
-        request.put("start", start);
-        request.put("pagesize", pagesize);
-        request.put("fields", fields);
-        request.put("hydrate", hydrate);
-        request.put("sort", sort);
-
-        if (properties != null) {
-            request.putAll(properties);
-        }
-
-        return new Gson().toJson(request);
+    void addParametersToQuery(QueryBuilder query) {
+        query.addField("find", find);
+        query.addField("start", start);
+        query.addField("pagesize", pagesize);
+        query.addField("fields", fields);
+        query.addField("hydrate", hydrate);
+        query.addField("sort", sort);
+        query.mergeProperties(properties);
     }
 }
