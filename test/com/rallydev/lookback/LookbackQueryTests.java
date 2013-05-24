@@ -89,7 +89,7 @@ public class LookbackQueryTests {
     public void encodedJsonContainsFields() {
         String json = api.newSnapshotQuery()
                 .requireFields("field1", "field2")
-                .buildRequestJson();
+                .getRequestJson();
 
         Map requestMap = new Gson().fromJson(json, Map.class);
         List fields = (List) requestMap.get("fields");
@@ -103,7 +103,7 @@ public class LookbackQueryTests {
     public void encodedJsonContainsHydrate() {
         String json = api.newSnapshotQuery()
                 .hydrateFields("field1", "field2")
-                .buildRequestJson();
+                .getRequestJson();
 
         Map requestMap = new Gson().fromJson(json, Map.class);
         List hydrate = (List) requestMap.get("hydrate");
@@ -118,7 +118,7 @@ public class LookbackQueryTests {
         String json = api.newSnapshotQuery()
                 .sortBy("field1")
                 .sortBy("field2", -1)
-                .buildRequestJson();
+                .getRequestJson();
 
         Map requestMap = new Gson().fromJson(json, Map.class);
         Map sort = (Map) requestMap.get("sort");
@@ -131,7 +131,7 @@ public class LookbackQueryTests {
     @Test
     public void encodedJsonContainsPagesizeAndStart() {
         String json = api.newSnapshotQuery()
-                .buildRequestJson();
+                .getRequestJson();
 
         Map requestMap = new Gson().fromJson(json, Map.class);
         double start = (Double) requestMap.get("start");
@@ -145,7 +145,7 @@ public class LookbackQueryTests {
     public void encodedJsonContainsProperties() {
         String json = api.newSnapshotQuery()
                 .addProperty("compress", true)
-                .buildRequestJson();
+                .getRequestJson();
 
         Map requestMap = new Gson().fromJson(json, Map.class);
         Boolean compress = (Boolean) requestMap.get("compress");
@@ -158,7 +158,7 @@ public class LookbackQueryTests {
         String json = api.newSnapshotQuery()
                 .addFindClause("Project", 1234)
                 .addFindClause("__At", "Current")
-                .buildRequestJson();
+                .getRequestJson();
 
         Map requestMap = new Gson().fromJson(json, Map.class);
         Map find = (Map) requestMap.get("find");
@@ -182,7 +182,7 @@ public class LookbackQueryTests {
 
         String json = api.newSnapshotQuery()
                 .addFindClause("$or", clauses)
-                .buildRequestJson();
+                .getRequestJson();
 
         Map requestMap = new Gson().fromJson(json, Map.class);
         Map find = (Map) requestMap.get("find");

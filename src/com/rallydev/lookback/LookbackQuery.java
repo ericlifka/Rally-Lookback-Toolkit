@@ -158,7 +158,7 @@ public class LookbackQuery {
         }
     }
 
-    String buildRequestJson() {
+    String getRequestJson() {
         QueryBuilder query = new QueryBuilder();
         addParametersToQuery(query);
         return query.getQueryJson();

@@ -61,7 +61,7 @@ public class LookbackApi {
     }
 
     LookbackResult executeQuery(LookbackQuery query) throws IOException {
-        String requestJson = query.buildRequestJson();
+        String requestJson = query.getRequestJson();
         HttpResponse response = executeRequest(requestJson);
         LookbackResult result = buildLookbackResult(response);
         return result.validate(query);
