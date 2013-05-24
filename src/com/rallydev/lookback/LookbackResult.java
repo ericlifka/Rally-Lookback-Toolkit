@@ -21,14 +21,6 @@ public class LookbackResult {
 
     LookbackQuery queryContext;
 
-    LookbackResult validate(LookbackQuery context) {
-        if (Errors != null && Errors.size() > 0) {
-            throw new LookbackException(Errors.get(0));
-        }
-        queryContext = context;
-        return this;
-    }
-
     public Iterator<Map<String, Object>> getResultsIterator() {
         return Results.iterator();
     }
@@ -38,6 +30,15 @@ public class LookbackResult {
     }
 
     public boolean hasMorePages() {
-        return StartIndex + Results.size() < TotalResultCount;
+        return Results != null
+                && StartIndex + Results.size() < TotalResultCount;
+    }
+
+    LookbackResult validate(LookbackQuery context) {
+        if (Errors != null && Errors.size() > 0) {
+            throw new LookbackException(Errors.get(0));
+        }
+        queryContext = context;
+        return this;
     }
 }

@@ -3,7 +3,10 @@ package com.rallydev.lookback;
 import com.rits.cloning.Cloner;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class LookbackQuery {
 
@@ -30,36 +33,12 @@ public class LookbackQuery {
         updateToNextPage();
     }
 
-    void cloneFields(LookbackQuery previousQuery) {
-        Cloner cloner = new Cloner();
-
-        find = cloner.deepClone(previousQuery.find);
-        sort = cloner.deepClone(previousQuery.sort);
-        fields = cloner.deepClone(previousQuery.fields);
-        hydrate = cloner.deepClone(previousQuery.hydrate);
-        properties = cloner.deepClone(previousQuery.properties);
-
-        isFieldsTrue = previousQuery.isFieldsTrue;
-        pagesize = previousQuery.pagesize;
-        start = previousQuery.start;
-    }
-
-    void updateToNextPage() {
-        start += pagesize;
-    }
-
     public LookbackResult execute() {
         try {
             return validateAndRun();
-        }
-        catch (IOException exception) {
+        } catch (IOException exception) {
             throw new LookbackException(exception);
         }
-    }
-
-    LookbackResult validateAndRun() throws IOException {
-        validateQuery();
-        return parentApi.executeQuery(this);
     }
 
     public LookbackQuery setPagesize(int pagesize) {
@@ -141,30 +120,53 @@ public class LookbackQuery {
         return this;
     }
 
-    void validateQuery() {
-        checkFieldsValid();
-        checkFindValid();
-    }
-
-    void checkFieldsValid() {
-        if (isFieldsTrue && fields != null) {
-            throw new LookbackException("Cannot set fields=true and pass required fields");
-        }
-    }
-
-    void checkFindValid() {
-        if (find == null) {
-            throw new LookbackException("Cannot execute query without find");
-        }
-    }
-
     String getRequestJson() {
         QueryBuilder query = new QueryBuilder();
         addParametersToQuery(query);
         return query.getQueryJson();
     }
 
-    void addParametersToQuery(QueryBuilder query) {
+    private void cloneFields(LookbackQuery previousQuery) {
+        Cloner cloner = new Cloner();
+
+        find = cloner.deepClone(previousQuery.find);
+        sort = cloner.deepClone(previousQuery.sort);
+        fields = cloner.deepClone(previousQuery.fields);
+        hydrate = cloner.deepClone(previousQuery.hydrate);
+        properties = cloner.deepClone(previousQuery.properties);
+
+        isFieldsTrue = previousQuery.isFieldsTrue;
+        pagesize = previousQuery.pagesize;
+        start = previousQuery.start;
+    }
+
+    private void updateToNextPage() {
+        start += pagesize;
+    }
+
+    private LookbackResult validateAndRun() throws IOException {
+        validateQuery();
+        return parentApi.executeQuery(this);
+    }
+
+    private void validateQuery() {
+        checkFieldsValid();
+        checkFindValid();
+    }
+
+    private void checkFieldsValid() {
+        if (isFieldsTrue && fields != null) {
+            throw new LookbackException("Cannot set fields=true and pass required fields");
+        }
+    }
+
+    private void checkFindValid() {
+        if (find == null) {
+            throw new LookbackException("Cannot execute query without find");
+        }
+    }
+
+    private void addParametersToQuery(QueryBuilder query) {
         query.addField("find", find);
         query.addField("start", start);
         query.addField("pagesize", pagesize);

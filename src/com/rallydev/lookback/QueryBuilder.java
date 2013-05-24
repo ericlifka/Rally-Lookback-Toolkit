@@ -31,7 +31,7 @@ class QueryBuilder {
                 .toJson(query);
     }
 
-    Gson getSerializer() {
+    private Gson getSerializer() {
         return new GsonBuilder()
                 .serializeNulls()
                 .create();

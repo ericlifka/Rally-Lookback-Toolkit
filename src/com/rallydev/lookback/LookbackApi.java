@@ -18,13 +18,18 @@ import java.util.Scanner;
 
 public class LookbackApi {
 
-    String server = "https://rally1.rallydev.com";
-    String versionMajor = "2";
-    String versionMinor = "0";
-
+    String server;
+    String versionMajor;
+    String versionMinor;
     String workspace;
     String username;
     String password;
+
+    public LookbackApi() {
+        server = "https://rally1.rallydev.com";
+        versionMajor = "2";
+        versionMinor = "0";
+    }
 
     public LookbackApi setCredentials(String username, String password) {
         this.username = username;
@@ -67,13 +72,26 @@ public class LookbackApi {
         return result.validate(query);
     }
 
-    LookbackResult buildLookbackResult(HttpResponse response) throws IOException {
+    private HttpResponse executeRequest(String requestJson) throws IOException {
+        HttpUriRequest request = createRequest(requestJson);
+        HttpClient httpClient = new DefaultHttpClient();
+        return httpClient.execute(request);
+    }
+
+    private LookbackResult buildLookbackResult(HttpResponse response) throws IOException {
         HttpEntity responseBody = validateResponse(response);
         String json = getResponseJson(responseBody);
         return serializeLookbackResultFromJson(json);
     }
 
-    HttpEntity validateResponse(HttpResponse response) {
+    private HttpUriRequest createRequest(String requestJson) throws IOException {
+        HttpPost post = new HttpPost(buildUrl());
+        addAuthHeaderToRequest(post);
+        post.setEntity(new StringEntity(requestJson, "UTF-8"));
+        return post;
+    }
+
+    private HttpEntity validateResponse(HttpResponse response) {
         HttpEntity responseBody = response.getEntity();
         if (responseBody == null) {
             throw new LookbackException("No data received from server");
@@ -81,7 +99,7 @@ public class LookbackApi {
         return responseBody;
     }
 
-    String getResponseJson(HttpEntity responseBody) throws IOException {
+    private String getResponseJson(HttpEntity responseBody) throws IOException {
         InputStream responseStream = responseBody.getContent();
         try {
             return readFromStream(responseStream);
@@ -90,12 +108,26 @@ public class LookbackApi {
         }
     }
 
-    LookbackResult serializeLookbackResultFromJson(String json) {
+    private LookbackResult serializeLookbackResultFromJson(String json) {
         Gson serializer = new GsonBuilder().serializeNulls().create();
         return serializer.fromJson(json, LookbackResult.class);
     }
 
-    String readFromStream(InputStream stream) {
+    private String buildUrl() {
+        if (workspace == null) {
+            throw new LookbackException("Workspace is required to execute query");
+        }
+
+        return String.format(
+                "%s/analytics/%s/service/rally/workspace/%s/artifact/snapshot/query.js",
+                server, buildApiVersion(), workspace);
+    }
+
+    private void addAuthHeaderToRequest(HttpRequest request) {
+        request.addHeader("Authorization", getBasicAuthHeader());
+    }
+
+    private String readFromStream(InputStream stream) {
         Scanner scanner = new Scanner(stream);
         scanner.useDelimiter("\\A");
         if (scanner.hasNext()) {
@@ -105,46 +137,26 @@ public class LookbackApi {
         }
     }
 
-    HttpResponse executeRequest(String requestJson) throws IOException {
-        HttpUriRequest request = createRequest(requestJson);
-        HttpClient httpClient = new DefaultHttpClient();
-
-        return httpClient.execute(request);
-    }
-
-    HttpUriRequest createRequest(String requestJson) throws IOException {
-        HttpPost post = new HttpPost(buildUrl());
-        post.setEntity(new StringEntity(requestJson, "UTF-8"));
-        addAuthHeaderToRequest(post);
-        return post;
-    }
-
-    String buildUrl() {
-        return String.format(
-                "%s/analytics/%s/service/rally/workspace/%s/artifact/snapshot/query.js",
-                server, buildApiVersion(), workspace);
-    }
-
-    String buildApiVersion() {
+    private String buildApiVersion() {
         return "v" + versionMajor + "." + versionMinor;
     }
 
-    void addAuthHeaderToRequest(HttpRequest request) {
-        request.addHeader("Authorization", getBasicAuthHeader());
-    }
-
-    String getBasicAuthHeader() {
+    private String getBasicAuthHeader() {
         byte[] token = getUnencodedAuthToken();
         byte[] encodedToken = Base64.encodeBase64(token);
         return buildAuthHeader(encodedToken);
     }
 
-    byte[] getUnencodedAuthToken() {
+    private byte[] getUnencodedAuthToken() {
+        if (username == null || password == null) {
+            throw new LookbackException("Username and Password are required to execute query");
+        }
+
         String tokenString = username + ":" + password;
         return tokenString.getBytes();
     }
 
-    String buildAuthHeader(byte[] encodedToken) {
+    private String buildAuthHeader(byte[] encodedToken) {
         String tokenString = new String(encodedToken);
         return "Basic " + tokenString;
     }
