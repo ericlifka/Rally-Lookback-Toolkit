@@ -12,7 +12,7 @@ To get started, create an instance of LookbackApi and configure it with your Ral
 
 Next, ask the LookbackApi object for a new query:
 
-    LookbackQuery query = api.newSnapshotQuery();
+    LookbackQuery query = lookbackApi.newSnapshotQuery();
 
 The LookbackQuery object provides functions for setting up the parameters to your query.
 
