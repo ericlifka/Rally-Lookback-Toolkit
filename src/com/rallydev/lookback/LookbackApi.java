@@ -92,6 +92,9 @@ public class LookbackApi {
     }
 
     private HttpEntity validateResponse(HttpResponse response) {
+        if (authorizationFailed(response)) {
+            throw new LookbackException("Authorization failed, check username and password");
+        }
         HttpEntity responseBody = response.getEntity();
         if (responseBody == null) {
             throw new LookbackException("No data received from server");
@@ -111,6 +114,10 @@ public class LookbackApi {
     private LookbackResult serializeLookbackResultFromJson(String json) {
         Gson serializer = new GsonBuilder().serializeNulls().create();
         return serializer.fromJson(json, LookbackResult.class);
+    }
+
+    private boolean authorizationFailed(HttpResponse response) {
+        return response.getStatusLine().getStatusCode() == 401;
     }
 
     private String buildUrl() {
