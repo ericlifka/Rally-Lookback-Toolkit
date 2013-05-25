@@ -2,6 +2,8 @@
 
 This toolkit provides an interface for interacting with Rally's Lookback API.
 
+Documentation for Rally's Lookback API can be found [here](https://rally1.rallydev.com/analytics/doc)
+
 The toolkit can be found on maven [here]()
 
 To get started, create an instance of LookbackApi and configure it with your Rally credentials and workspace information:
