@@ -8,6 +8,26 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * LookbackQuery objects present an interface for configuring a query before executing it.
+ * Request a query LookbackQuery object from your LookbackApi object, and configure it
+ * as necessary, then use the execute method to run the query. If more pages of data exist,
+ * they can be queried for as well with LookbackApi's getQueryForNextPage method.
+ *
+ *      LookbackQuery query = api.newSnapshotQuery()
+ *                              .addFindClause("_TypeHierarchy", "Defect")
+ *                              .setStart(1000)
+ *                              .setPagesize(1000)
+ *                              .sortBy("_ValidFrom")
+ *                              .requireFields("ObjectID", "ScheduleState", "_ValidFrom", "_ValidTo")
+ *                              .hydrateFields("ScheduleState");
+ *
+ *      LookbackResult resultSet = query.execute();
+ *
+ *      if (resultSet.hasMorePages()) {
+ *          LookbackQuery nextQuery = api.getQueryForNextPage(resultSet);
+ *      }
+ */
 public class LookbackQuery {
 
     LookbackApi parentApi;
@@ -33,6 +53,10 @@ public class LookbackQuery {
         updateToNextPage();
     }
 
+    /**
+     * Execute this LookbackQuery as it is configured.
+     * @return LookbackResult - a representation of the returned data.
+     */
     public LookbackResult execute() {
         try {
             return validateAndRun();
@@ -41,21 +65,45 @@ public class LookbackQuery {
         }
     }
 
+    /**
+     * Sets the page size for the query.
+     * @param pagesize
+     * @return LookbackQuery - Enables method chaining
+     */
     public LookbackQuery setPagesize(int pagesize) {
         this.pagesize = pagesize;
         return this;
     }
 
+    /**
+     * Sets the start index for the query.
+     * @param start
+     * @return LookbackQuery - Enables method chaining
+     */
     public LookbackQuery setStart(int start) {
         this.start = start;
         return this;
     }
 
+    /**
+     * Configures the query to request all fields available for Snapshots.
+     * Warning: This is intended for development, pagesize is limited by the LookbackApi
+     * when fields is set to True. When transitioning to production please configure queries
+     * to request only the fields they need.
+     * @return LookbackQuery - Enables method chaining
+     */
     public LookbackQuery setFieldsTrue() {
         this.isFieldsTrue = true;
         return this;
     }
 
+    /**
+     * Adds fields to the 'fields' parameter of the query. These fields will be included
+     * on any Snapshots that have them. This is incompatible with setFieldsTrue, only one can be utilized.
+     * A LookbackException will be thrown if both are configured for the same LookbackQuery object.
+     * @param requiredFields
+     * @return LookbackQuery - Enables method chaining
+     */
     public LookbackQuery requireFields(String... requiredFields) {
         if (fields == null) {
             fields = new ArrayList<String>();
@@ -70,10 +118,21 @@ public class LookbackQuery {
         return this;
     }
 
+    /**
+     * Adds a field to the 'sort' parameter of the query as an ascending sort.
+     * @param field
+     * @return LookbackQuery - Enables method chaining
+     */
     public LookbackQuery sortBy(String field) {
         return sortBy(field, 1);
     }
 
+    /**
+     * Adds a field to the 'sort' parameter of the query in the specified direction.
+     * @param field
+     * @param direction - 1 for ascending, -1 for descending
+     * @return LookbackQuery - Enables method chaining
+     */
     public LookbackQuery sortBy(String field, int direction) {
         if (direction != 1 && direction != -1) {
             throw new LookbackException("Sort only supports values of 1 or -1");
@@ -87,7 +146,13 @@ public class LookbackQuery {
         return this;
     }
 
-
+    /**
+     * Adds fields to be hydrated. Hydration replaces rally OID values with human
+     * readable values where possible. Hydration is not necessary for querying, but
+     * is useful for interpretting snapshot results.
+     * @param fields
+     * @return LookbackQuery - Enables method chaining
+     */
     public LookbackQuery hydrateFields(String... fields) {
         if (hydrate == null) {
             hydrate = new ArrayList<String>();
@@ -102,21 +167,57 @@ public class LookbackQuery {
         return this;
     }
 
-    public LookbackQuery addProperty(String field, Object property) {
-        if (properties == null) {
-            properties = new HashMap<String, Object>();
-        }
-
-        properties.put(field, property);
-        return this;
-    }
-
+    /**
+     * Add a clause to the find parameter. Clauses can be either simple string values
+     * or more complex objects:
+     *
+     *      // Simple clause, represents {"_TypeHierarchy": "HierarchicalRequirement"}
+     *      query.addFindClause("_TypeHierarchy", "HierarchicalRequirement");
+     *
+     *      // More complex clause, represents
+     *      // {
+     *      //     "$or": [
+     *      //         {"_TypeHierarchy": "hierarchicalRequirement"},
+     *      //         {"_TypeHierarchy": "Defect"}
+     *      //     ]
+     *      // }
+     *      Map defect = new HashMap();
+     *      Map story = new HashMap();
+     *      defect.put("_TypeHierarchy", "Defect");
+     *      story.put("_TypeHierarchy", "HierarchicalRequirement");
+     *
+     *      List orClause = new ArrayList(2);
+     *      orClause.add(defect);
+     *      orClause.add(story);
+     *
+     *      query.addFindClause("$or", orClause);
+     *
+     * @param field
+     * @param value
+     * @return LookbackQuery - Enables method chaining
+     */
     public LookbackQuery addFindClause(String field, Object value) {
         if (find == null) {
             find = new HashMap<String, Object>();
         }
 
         find.put(field, value);
+        return this;
+    }
+
+    /**
+     * Add a query parameter not specified otherwise. This allows for future changes
+     * to the lookback api that may require new parameters.
+     * @param parameter - parameter name
+     * @param value - parameter value
+     * @return LookbackQuery - Enables method chaining
+     */
+    public LookbackQuery addProperty(String parameter, Object value) {
+        if (properties == null) {
+            properties = new HashMap<String, Object>();
+        }
+
+        properties.put(parameter, value);
         return this;
     }
 

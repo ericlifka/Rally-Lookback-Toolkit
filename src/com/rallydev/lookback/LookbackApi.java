@@ -16,6 +16,20 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Scanner;
 
+/**
+ * LookbackApi objects provide an API for communicating with Rally's Lookback API service.
+ * Create a LookbackApi object with the default constructor and then set your authentication
+ * credentials and workspace:
+ *
+ *      LookbackApi api = new LookbackApi()
+ *                          .setCredentials("myRallyUsername", "myRallyPassword")
+ *                          .setWorkspace("myRallyWorkspace");
+ *
+ * Request a LookbackQuery from your LookbackApi object, it can be used to configure and execute
+ * whatever query you wish to make:
+ *
+ *      LookbackQuery query = api.newSnapshotQuery();
+ */
 public class LookbackApi {
 
     String server;
@@ -25,42 +39,74 @@ public class LookbackApi {
     String username;
     String password;
 
+    /**
+     * Create LookbackApi objects for communicating with Rally's Lookback API.
+     */
     public LookbackApi() {
         server = "https://rally1.rallydev.com";
         versionMajor = "2";
         versionMinor = "0";
     }
 
+    /**
+     * Set your Rally credentials for use in LookbackQuery's.
+     * @param username - Your Rally Username
+     * @param password - Your Rally Password
+     * @return LookbackApi - Enables method chaining
+     */
     public LookbackApi setCredentials(String username, String password) {
         this.username = username;
         this.password = password;
-
         return this;
     }
 
+    /**
+     * Set the Rally server you wish to communicate with, by default the
+     * server is set to https://rally1.rallydev.com
+     * @param server - The Rally server you wish to use, must include the protocol
+     * @return LookbackApi - Enables method chaining
+     */
     public LookbackApi setServer(String server) {
         this.server = server;
-
         return this;
     }
 
+    /**
+     * Set the Rally workspace you wish to make queries against, must be a workspace
+     * for which you have read permissions.
+     * @param workspace - The Rally workspace you wish to query
+     * @return LookbackApi - Enables method chaining
+     */
     public LookbackApi setWorkspace(String workspace) {
         this.workspace = workspace;
-
         return this;
     }
 
+    /**
+     * Set the version of Lookback API you wish to use, by default the version is 2.0.
+     * @param major
+     * @param minor
+     * @return LookbackApi - Enables method chaining
+     */
     public LookbackApi setVersion(String major, String minor) {
         this.versionMajor = major;
         this.versionMinor = minor;
-
         return this;
     }
 
+    /**
+     * Create a new LookbackQuery object for configuring a query.
+     * @return LookbackQuery - new query object
+     */
     public LookbackQuery newSnapshotQuery() {
         return new LookbackQuery(this);
     }
 
+    /**
+     * Use a LookbackResult to create a new LookbackQuery for the next page of results.
+     * @param resultSet - The LookbackResult representing the previous page of results
+     * @return LookbackQuery - Query object for the next page of data
+     */
     public LookbackQuery getQueryForNextPage(LookbackResult resultSet) {
         return new LookbackQuery(resultSet, this);
     }
