@@ -1,10 +1,8 @@
 # Rally Lookback API Toolkit #
 
-This toolkit provides an interface for interacting with Rally's Lookback API.
+This toolkit provides an interface for interacting with Rally's Lookback API. Documentation for Rally's Lookback API can be found [here](https://rally1.rallydev.com/analytics/doc)
 
-Documentation for Rally's Lookback API can be found [here](https://rally1.rallydev.com/analytics/doc)
-
-The toolkit can be found on maven [here]()
+Maven support coming soon. To use this toolkit in your project, download the jar [here](https://github.com/ericlifka/Rally-Lookback-Toolkit/blob/master/out/artifacts/lbapi_rest_toolkit_jar/lbapi-rest-toolkit.jar?raw=true) and add it to your project. All dependencies are included.
 
 To get started, create an instance of LookbackApi and configure it with your Rally credentials and workspace information:
 
@@ -29,8 +27,7 @@ Find clauses can also be complex, simply build up representational objects and t
     greaterThanInProgress.put("$gt", "In-Progress");
     query.addFindClause("ScheduleState", greaterThanInProgress);
 
-LookbackQuery also provides for modifying all of the other aspects of a query, such as pagesize, start, fields, sort, and hydration.
-All of the objects in the toolkit support chaining for easier specification:
+LookbackQuery also provides for modifying all of the other aspects of a query, such as pagesize, start, fields, sort, and hydration. All of the objects in the toolkit support chaining for easier specification:
 
     query.setPagesize(200)                      // set pagesize to 200 instead of the default 20k
             .setStart(200)                      // ask for the second page of data
@@ -48,9 +45,7 @@ Once the query is configured it can be executed via `query.execute()` which retu
 
     LookbackResult resultSet = query.execute();
 
-If anything goes wrong with executing the query, such as an authentication exception, a LookbackException will be raised, which is a runtime exception.
-Any errors returned by the Lookback API will also be raised as runtime exceptions.
-The Lookback API will return warnings for certain issues that don't stop the request. The LookbackResult contains these warnings, and they can be checked for:
+If anything goes wrong with executing the query, such as an authentication exception, a LookbackException will be raised, which is a runtime exception. Any errors returned by the Lookback API will also be raised as runtime exceptions. The Lookback API will return warnings for certain issues that don't stop the request. The LookbackResult contains these warnings, and they can be checked for:
 
     if (resultSet.hasWarnings()) {
         // check warnings
@@ -87,8 +82,8 @@ Due to the chained nature of the api, one off queries can be made all in one go:
                 .execute()
                     .getResultsIterator();
 
-One quirk in dealing with Rally data from Java is dealing with OIDs, which are integers, but mcuh larger than Java's max size for integers.
-The BigInteger class as illustrated in the above example is an easy way to work around this issue.
+One quirk in dealing with Rally data from Java is dealing with OIDs, which are integers, but mcuh larger than Java's max size for integers. The BigInteger class as illustrated in the above example is an easy way to work around this issue.
+
 
 ## MIT License ##
 
