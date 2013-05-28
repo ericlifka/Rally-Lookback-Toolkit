@@ -4,10 +4,7 @@ import com.google.gson.Gson;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class LookbackQueryTests {
 
@@ -36,12 +33,12 @@ public class LookbackQueryTests {
 
     @Test
     public void requireFieldsAddsAllParameters() {
-        List<String> fields = api.newSnapshotQuery().requireFields("1", "2", "3").fields;
+        Set<String> fields = api.newSnapshotQuery().requireFields("1", "2", "3").fields;
 
         assert (3 == fields.size());
-        assert ("1".equals(fields.get(0)));
-        assert ("2".equals(fields.get(1)));
-        assert ("3".equals(fields.get(2)));
+        assert (fields.contains("1"));
+        assert (fields.contains("2"));
+        assert (fields.contains("3"));
     }
 
     @Test

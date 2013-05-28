@@ -3,10 +3,7 @@ package com.rallydev.lookback;
 import com.rits.cloning.Cloner;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * LookbackQuery objects present an interface for configuring a query before executing it.
@@ -34,8 +31,8 @@ public class LookbackQuery {
 
     Map<String, Object> find;
     Map<String, Integer> sort;
-    List<String> fields;
-    List<String> hydrate;
+    Set<String> fields;
+    Set<String> hydrate;
 
     Map<String, Object> properties;
 
@@ -106,13 +103,11 @@ public class LookbackQuery {
      */
     public LookbackQuery requireFields(String... requiredFields) {
         if (fields == null) {
-            fields = new ArrayList<String>();
+            fields = new HashSet<String>();
         }
 
         for (String f : requiredFields) {
-            if (!fields.contains(f)) {
-                fields.add(f);
-            }
+            fields.add(f);
         }
 
         return this;
@@ -155,13 +150,11 @@ public class LookbackQuery {
      */
     public LookbackQuery hydrateFields(String... fields) {
         if (hydrate == null) {
-            hydrate = new ArrayList<String>();
+            hydrate = new HashSet<String>();
         }
 
         for (String f : fields) {
-            if (!hydrate.contains(f)) {
-                hydrate.add(f);
-            }
+            hydrate.add(f);
         }
 
         return this;
